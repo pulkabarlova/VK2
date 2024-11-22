@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">VK2</string>
+    <string name="load">Load image</string>
+    <string name="error">Try Again</string>
+</resources>
