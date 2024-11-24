@@ -1,6 +1,6 @@
-package com.polina.vk2
+package com.polina.vk2.fragments
 
-import MyAdapter
+import com.polina.vk2.recycler.MyAdapter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,7 +8,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.snackbar.Snackbar
+import com.polina.vk2.R
 import com.polina.vk2.databinding.MainFragmentBinding
+import com.polina.vk2.network.RetrofitInstance
 import kotlinx.coroutines.launch
 
 class MainFragment : Fragment(R.layout.main_fragment) {
@@ -17,7 +19,8 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     private val binding get() = _binding!!
     private var currentUrlList = mutableListOf<String>()
     private val adapter = MyAdapter()
-    private val key = "live_ssyALQBcQkji6KfNgOluG0zk4o8vEKWKsKQrvE8NHluVE5rd2yMBWM5XlqbY4d9H"
+    private val url = "url"
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,7 +41,7 @@ class MainFragment : Fragment(R.layout.main_fragment) {
         binding.progressBar.visibility = View.INVISIBLE
         binding.recyclerView.adapter = adapter
         if (savedInstanceState != null) {
-            val savedUrls = savedInstanceState.getStringArrayList("url")
+            val savedUrls = savedInstanceState.getStringArrayList(url)
             if (savedUrls != null) {
                 currentUrlList = savedUrls.toMutableList()
                 adapter.setItems(currentUrlList)
@@ -55,14 +58,20 @@ class MainFragment : Fragment(R.layout.main_fragment) {
         binding.loadButton.isEnabled = false
         binding.progressBar.visibility = View.VISIBLE
         try {
-            val response = RetrofitInstance().api.getImages(key)
+            val response = RetrofitInstance().api.getImages()
             if (response.isSuccessful) {
                 val catApiResponse = response.body()
                 if (catApiResponse != null) {
-                    val imageUrl = catApiResponse[0].url
-                    currentUrlList.add(imageUrl)
-                    adapter.addItems(imageUrl)
+                    for (i in catApiResponse) {
+                        currentUrlList.add(i.url)
+                    }
+                    adapter.setItems(currentUrlList)
+                } else {
+                    Snackbar.make(binding.root, getString(R.string.error), Snackbar.LENGTH_SHORT)
+                        .show()
                 }
+            } else {
+                Snackbar.make(binding.root, getString(R.string.error), Snackbar.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Snackbar.make(binding.root, getString(R.string.error), Snackbar.LENGTH_SHORT).show()
@@ -74,6 +83,6 @@ class MainFragment : Fragment(R.layout.main_fragment) {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putStringArrayList("url", ArrayList(currentUrlList))
+        outState.putStringArrayList(url, ArrayList(currentUrlList))
     }
 }

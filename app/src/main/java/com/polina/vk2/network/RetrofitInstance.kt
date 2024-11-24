@@ -1,5 +1,4 @@
-package com.polina.vk2
-import android.util.Log
+package com.polina.vk2.network
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 //live_ssyALQBcQkji6KfNgOluG0zk4o8vEKWKsKQrvE8NHluVE5rd2yMBWM5XlqbY4d9H

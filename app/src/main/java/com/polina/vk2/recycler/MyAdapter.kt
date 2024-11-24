@@ -1,3 +1,5 @@
+package com.polina.vk2.recycler
+
 import android.view.LayoutInflater
 
 import android.view.ViewGroup

@@ -1,4 +1,4 @@
-package com.polina.vk2
+package com.polina.vk2.catModel
 
 
 data class CatImage(

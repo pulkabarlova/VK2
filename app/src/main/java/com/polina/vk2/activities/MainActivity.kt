@@ -1,12 +1,9 @@
-package com.polina.vk2
+package com.polina.vk2.activities
 
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.polina.vk2.fragments.MainFragment
 import com.polina.vk2.databinding.ActivityMainBinding
-import com.polina.vk2.databinding.MainFragmentBinding
 
 class MainActivity : AppCompatActivity() {
 
