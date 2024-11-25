@@ -1,5 +1,6 @@
 package com.polina.vk2.fragments
 
+import android.media.VolumeShaper.Configuration
 import com.polina.vk2.recycler.MyAdapter
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,6 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
 import com.polina.vk2.R
 import com.polina.vk2.databinding.MainFragmentBinding
@@ -20,6 +24,8 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     private var currentUrlList = mutableListOf<String>()
     private val adapter = MyAdapter()
     private val url = "url"
+    private var isLoading = false
+    private var spanCount = 2
 
 
     override fun onCreateView(
@@ -39,7 +45,6 @@ class MainFragment : Fragment(R.layout.main_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.progressBar.visibility = View.INVISIBLE
-        binding.recyclerView.adapter = adapter
         if (savedInstanceState != null) {
             val savedUrls = savedInstanceState.getStringArrayList(url)
             if (savedUrls != null) {
@@ -47,6 +52,7 @@ class MainFragment : Fragment(R.layout.main_fragment) {
                 adapter.setItems(currentUrlList)
             }
         }
+        setUpRecycler()
         binding.loadButton.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 loadData()
@@ -79,6 +85,34 @@ class MainFragment : Fragment(R.layout.main_fragment) {
             binding.progressBar.visibility = View.INVISIBLE
             binding.loadButton.isEnabled = true
         }
+    }
+
+    fun setUpRecycler(){
+        if (resources.configuration.orientation == 1)
+            spanCount = 2
+        else
+            spanCount = 3
+        val layoutManager = GridLayoutManager(context, spanCount)
+        binding.recyclerView.adapter = adapter
+        binding.recyclerView.layoutManager = layoutManager
+        binding.recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (dy > 0 && !isLoading) {
+                    val visibleItemCount = layoutManager.childCount
+                    val totalItemCount = layoutManager.itemCount
+                    val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                    if (visibleItemCount + firstVisibleItemPosition >= totalItemCount) {
+                        isLoading = true
+                        binding.progressBar.visibility = View.VISIBLE
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            loadData()
+                            isLoading = false
+                        }
+                    }
+                }
+            }
+        })
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
